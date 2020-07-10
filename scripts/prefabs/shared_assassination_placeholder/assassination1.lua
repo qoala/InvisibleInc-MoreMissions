@@ -38,7 +38,7 @@ local tiles =
         variant = 0,
         tags =
         {
-            "scientistFinal",
+            "safeRoomFinal",
             "noguard",
         },
     },
@@ -90,6 +90,7 @@ local tiles =
         tags =
         {
             "noguard",
+            "safeRoomLockDoor",
         },
     },
     {
@@ -120,7 +121,6 @@ local tiles =
         tags =
         {
             "noguard",
-            "scientistLockDoor",
         },
     },
     {
@@ -668,10 +668,54 @@ local units =
             {
                 x = 3,
                 y = 1,
-                template = [[research_processor]],
+                template = [[lab_safe]],
                 unitData =
                 {
                     facing = 2,
+                    tags =
+                    {
+                        "safeRoomStorage",
+                    }
+                },
+            },
+            1,
+        },
+    },
+    bounty_target =
+    {
+        spawnChance = 1,
+        maxCount = 1,
+        {
+            {
+                x = 2,
+                y = 5,
+                template = [[npc_bounty_target]],
+                unitData =
+                {
+                    facing = 1,
+                    traits={nopatrol=true,mm_fixnopatrolfacing=true,mm_nopatrolchange=true},
+                    tags =
+                    {
+                        "bounty_target",
+                    },
+                },
+            },
+            1,
+        },
+    },
+    bodyguard =
+    {
+        spawnChance = 1,
+        maxCount = 1,
+        {
+            {
+                x = 4,
+                y = 8,
+                template = [[npc_guard]],
+                unitData =
+                {
+                    facing = 5,
+                    traits={nopatrol=true,mm_fixnopatrolfacing=true,mm_nopatrolchange=true},
                 },
             },
             1,
