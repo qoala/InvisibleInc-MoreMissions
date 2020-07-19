@@ -129,7 +129,52 @@ local function pstsawfn( script, sim, ceo )
 
 end
 
-local function ceoalerted(script, sim)
+local function findCell( sim, tag )
+    local cells = sim:getCells( tag )
+    return cells and cells[1]
+end
+
+local function modifySafeRoomDoor(sim, script, open)
+    local c =  findCell( sim, "safeRoomLockDoor" )
+	log:write( "DEBUG MM: doorcell %d,%d", c.x, c.y )
+	log:write( "DEBUG MM: ", util.stringize(c.exits, 2) )
+    if open then
+        for i, exit in pairs( c.exits ) do
+            if exit.door and exit.locked and exit.keybits == simdefs.DOOR_KEYS.BLAST_DOOR then 
+                sim:modifyExit( c, i, simdefs.EXITOP_UNLOCK )
+                sim:modifyExit( c, i, simdefs.EXITOP_OPEN )
+                sim:dispatchEvent( simdefs.EV_EXIT_MODIFIED, {cell=c, dir=i} )
+            end
+        end  
+    else
+        for i, exit in pairs( c.exits ) do
+            if exit.door and not exit.closed and exit.keybits == simdefs.DOOR_KEYS.BLAST_DOOR then 
+                sim:modifyExit( c, i, simdefs.EXITOP_LOCK )
+                sim:modifyExit( c, i, simdefs.EXITOP_CLOSE )
+                sim:dispatchEvent( simdefs.EV_EXIT_MODIFIED, {cell=c, dir=i} )
+            end
+        end          
+    end
+end
+
+local function ceoalertedSafeRoom(script, sim)
+	script:waitFor( CEO_ALERTED )
+	local ceo = mission_util.findUnitByTag( sim, "bounty_target" )
+	local finalCell = sim:getCells( "safeRoomFinal" )[1]
+	-- Prefab should always place the safe facing the door.
+	local safe = mission_util.findUnitByTag( sim, "safeRoomStorage" )
+	local facing = safe:getFacing()
+
+	-- Set the CEO's new panic "patrol" route
+	ceo:getTraits().patrolPath = { { x = finalCell.x, y = finalCell.y } }
+	-- Custom property for 'turning in place' behavior in BountyTargetBrain
+	ceo:getTraits().patrolFacing = { facing, (facing + 7) % 8, facing, (facing + 1) % 8, }
+
+	-- Open the safe room
+	modifySafeRoomDoor( sim, script, true )
+end
+
+local function ceoalertedMessage(script, sim)
 	script:waitFor( CEO_ALERTED )
 	local ceo = mission_util.findUnitByTag( sim, "bounty_target" )
 	if not ceo:isDown() then
@@ -185,7 +230,8 @@ function mission:init( scriptMgr, sim )
 	scriptMgr:addHook( "GOTLOOT", gotloot, nil, self)
 
 	--In case the target gets away, ripped straight from the CFO interrogation mission
-    scriptMgr:addHook( "RUN", ceoalerted, nil, self)
+    scriptMgr:addHook( "RUN", ceoalertedMessage, nil, self)
+    scriptMgr:addHook( "SAFEROOM", ceoalertedSafeRoom, nil, self)
     scriptMgr:addHook( "escaped", ceoescaped, nil, self)
 
 	--This picks a reaction rant from Central on exit based upon whether or not an agent has escaped with the loot yet.

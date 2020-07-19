@@ -116,6 +116,11 @@ local function load( modApi, options, params )
 
     local scriptPath = modApi:getScriptPath()
 
+	include( scriptPath .. "/btree/actions" )
+	include( scriptPath .. "/btree/conditions" )
+
+	include( scriptPath .. "/btree/bountytargetbrain" )
+
 	-- itemdefs moved to lateLoad to allow other mods to populate itemdefs for Tech Expo automatic template generation
 	--local itemdefs = include( scriptPath .. "/itemdefs" )
 	--for name, itemDef in pairs(itemdefs) do
