@@ -226,6 +226,7 @@ local agent_templates =
 			hasHearing = false,
 			pacifist = true,
 			dynamicImpass = false,
+			MM_agencyDynamicNonImpass = true, -- Prevents pathing through lethal lasers
 			augmentMaxSize = 0,
 			isAiming = false,
 			noUpgrade = true,
