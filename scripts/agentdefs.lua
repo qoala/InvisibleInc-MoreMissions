@@ -236,10 +236,10 @@ local agent_templates =
 			PWROnHand = 0,
 			scanSweeps = true,
 			cant_abandon = true,
-			hidesInCover = true, --false,
+			hidesInCover = true, -- If setting back to false, uncomment doesNotHideInCover for the tooltip.
 			-- doesNotHideInCover = true, --for tooltip
 			refitDroneFriend = true,
-			-- disguiseOn = true,
+			-- disguiseOn = true, -- If uncommenting, update "REPROGRAMMED" string description.
 		},
 		fullname = STRINGS.AGENTS.HOSTAGE.ALT_1.FULLNAME,
 		yearsOfService = STRINGS.AGENTS.HOSTAGE.YEARS_OF_SERVICE,
