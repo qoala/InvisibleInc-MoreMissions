@@ -1,27 +1,53 @@
 local array = include( "modules/array" )
 local util = include( "modules/util" )
+local mui_tooltip = include( "mui/mui_tooltip" )
 local cdefs = include( "client_defs" )
 local simdefs = include("sim/simdefs")
 local simquery = include("sim/simquery")
 local abilityutil = include( "sim/abilities/abilityutil" )
 
+local pet_tooltip = class( mui_tooltip )
+
+function pet_tooltip:init( hud, unit, apBoost, title, body )
+	mui_tooltip.init( self, title, body )
+	self._game = hud._game
+	self._unit = unit
+	self._apCost = -apBoost
+end
+
+function pet_tooltip:activate( screen )
+	mui_tooltip.activate( self, screen )
+	self._game.hud:previewAbilityAP( self._unit, self._apCost )
+end
+
+function pet_tooltip:deactivate()
+	mui_tooltip.deactivate( self )
+	self._game.hud:previewAbilityAP( self._unit, 0 )
+end
+
 local MM_petDrone =
 	{
 		name = STRINGS.MOREMISSIONS.ABILITIES.PET_DRONE,
 
-		createToolTip = function( self, sim, unit )
-
-			local title = STRINGS.MOREMISSIONS.ABILITIES.PET..util.toupper(unit:getTraits().customName or "Refit Drone")
+		onTooltip = function( self, hud, sim, abilityOwner, abilityUser )
+			local title = STRINGS.MOREMISSIONS.ABILITIES.PET..util.toupper(abilityOwner:getTraits().customName or "Refit Drone")
 			local body = STRINGS.MOREMISSIONS.ABILITIES.PET_DRONE_DESC
 
-			if unit:getTraits().activate_txt_title then
-				title = unit:getTraits().activate_txt_title
+			if abilityOwner:getTraits().activate_txt_title then
+				title = abilityOwner:getTraits().activate_txt_title
 			end
-			if unit:getTraits().activate_txt_body then
-				body = unit:getTraits().activate_txt_body
+			if abilityOwner:getTraits().activate_txt_body then
+				body = abilityOwner:getTraits().activate_txt_body
 			end
 
-			return abilityutil.formatToolTip( title,  body )
+			-- Optionally append can't-use-reason,
+			-- styled how agent_panel would when using createTooltip() instead of onTooltip().
+			local _, reason = abilityUser:canUseAbility( sim, self, abilityOwner )
+			if reason then
+				body = body .. "\n<c:ff0000>" .. reason .. "</>"
+			end
+
+			return pet_tooltip( hud, abilityUser, self.ap_boost, title,  body )
 		end,
 
 		proxy = true,
