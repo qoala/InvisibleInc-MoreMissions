@@ -231,7 +231,6 @@ local agent_templates =
 			noUpgrade = true,
 			dashSoundRange = 0,
 			noLoopOverwatch = true,
-			isAiming = true,
 			mainframe_no_daemon_spawn = true,
 			lookaroundRange = 4,
 			PWROnHand = 0,
