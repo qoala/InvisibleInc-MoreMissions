@@ -5,9 +5,9 @@ local simdefs = include("sim/simdefs")
 local simquery = include("sim/simquery")
 local abilityutil = include( "sim/abilities/abilityutil" )
 
-local MM_renameDrone =
+local MM_petDrone =
 	{
-		name = STRINGS.MOREMISSIONS.ABILITIES.RENAME_DRONE,
+		name = STRINGS.MOREMISSIONS.ABILITIES.PET_DRONE,
 
 		createToolTip = function( self, sim, unit )
 
@@ -43,7 +43,14 @@ local MM_renameDrone =
 				return false
 			end
 
-            return simquery.canUnitReach(sim, unit, abilityOwner:getLocation())
+			-- canUnitReach reports BLOCKED or OUT OF REACH even if there's a wall in the way so rule that out first.
+			-- But we want the OUT OF REACH message to help users discover this ability.
+			local agentCell = sim:getCell(unit:getLocation())
+			local droneCell = sim:getCell(abilityOwner:getLocation())
+			if not simquery.canPathBetween(sim, unit, agentCell, droneCell) then
+				return false
+			end
+			return simquery.canUnitReach(sim, unit, droneCell.x, droneCell.y)
 		end,
 
 		executeAbility = function( self, sim, abilityOwner, unit )
@@ -72,4 +79,4 @@ local MM_renameDrone =
 		end,
 	}
 
-return MM_renameDrone
+return MM_petDrone
