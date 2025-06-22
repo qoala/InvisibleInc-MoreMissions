@@ -47,7 +47,8 @@ local MM_petDrone =
 				body = body .. "\n<c:ff0000>" .. reason .. "</>"
 			end
 
-			return pet_tooltip( hud, abilityUser, self.ap_boost, title,  body )
+			local previewAPBoost = self._shouldShowAPBonus and self.ap_boost or 0
+			return pet_tooltip( hud, abilityUser, previewAPBoost, title,  body )
 		end,
 
 		proxy = true,
@@ -58,6 +59,13 @@ local MM_petDrone =
 		end,
 
 		profile_icon = "gui/icons/action_icons/Action_icon_Small/icon-action_pet_drone.png",
+
+		onSpawnAbility = function( self )
+			-- Use a settings 'seenOnce', to store if the user has ever pet a drone before.
+			-- The AP Bonus UI preview is suppressed until the ability's effect has been seen.
+			local settings = savefiles.getSettings( "settings" )
+			self._shouldShowAPBonus = settings.data.seenOnce[ "MM-petDrone-AP" ]
+		end,
 
 		-- Note that abilityOwner is the drone, unit is the agent!
 		canUseAbility = function( self, sim, abilityOwner, unit )
@@ -101,7 +109,13 @@ local MM_petDrone =
 
 			unit:getTraits().hasAlreadyPetDrone = true
 
-
+			if not self._shouldShowAPBonus then
+				-- Player has seen the AP boost. The UI may now show it on other agents or in future games.
+				local settings = savefiles.getSettings( "settings" )
+				self._shouldShowAPBonus = true
+				settings.data.seenOnce[ "MM-petDrone-AP" ] = true
+				settings:save()
+			end
 		end,
 	}
 
