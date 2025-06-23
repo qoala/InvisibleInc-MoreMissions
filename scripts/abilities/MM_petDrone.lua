@@ -6,23 +6,15 @@ local simdefs = include("sim/simdefs")
 local simquery = include("sim/simquery")
 local abilityutil = include( "sim/abilities/abilityutil" )
 
-local pet_tooltip = class( mui_tooltip )
-
-function pet_tooltip:init( hud, unit, apBoost, title, body )
-	mui_tooltip.init( self, title, body )
-	self._game = hud._game
-	self._unit = unit
-	self._apCost = -apBoost
-end
-
-function pet_tooltip:activate( screen )
-	mui_tooltip.activate( self, screen )
-	self._game.hud:previewAbilityAP( self._unit, self._apCost )
-end
-
-function pet_tooltip:deactivate()
-	mui_tooltip.deactivate( self )
-	self._game.hud:previewAbilityAP( self._unit, 0 )
+local pet_tooltip = abilityutil.uitr_ap_tooltip
+if not pet_tooltip then
+    pet_tooltip = function(hud, title, body, reason)
+        -- cant-use-reason styled how agent_panel would when using createTooltip() instead of onTooltip().
+        if reason then
+            body = body .. "\n<c:ff0000>" .. reason .. "</>"
+        end
+        return mui_tooltip(title, body)
+    end
 end
 
 local MM_petDrone =
@@ -40,15 +32,9 @@ local MM_petDrone =
 				body = abilityOwner:getTraits().activate_txt_body
 			end
 
-			-- Optionally append can't-use-reason,
-			-- styled how agent_panel would when using createTooltip() instead of onTooltip().
 			local _, reason = abilityUser:canUseAbility( sim, self, abilityOwner )
-			if reason then
-				body = body .. "\n<c:ff0000>" .. reason .. "</>"
-			end
-
 			local previewAPBoost = self._shouldShowAPBonus and self.ap_boost or 0
-			return pet_tooltip( hud, abilityUser, previewAPBoost, title,  body )
+			return pet_tooltip( hud, title, body, reason, {{ unit=abilityUser, apCost=-previewAPBoost}} )
 		end,
 
 		proxy = true,
