@@ -13,7 +13,7 @@ include makeconfig.mk
 
 ensuredir = @mkdir -p $(@D)
 
-files := modinfo.txt scripts.zip gui.kwad moremissions_anims.kwad sound.kwad pedler_oil.kwad
+files := modinfo.txt scripts.zip gui.kwad moremissions_anims.kwad sound.kwad oil_fx.kwad
 outfiles := $(addprefix out/, $(files))
 installfiles := $(addprefix $(INSTALL_PATH)/, $(files))
 ifneq ($(INSTALL_PATH2),)
@@ -68,9 +68,9 @@ out/gui.kwad out/moremissions_anims.kwad out/sound.kwad: $(anims) $(guis) $(soun
 	mkdir -p out
 	$(KWAD_BUILDER) -i build.lua -o out
 
-out/pedler_oil.kwad: pedler_oil.kwad
+out/oil_fx.kwad: oil_fx.kwad
 	$(ensuredir)
-	cp pedler_oil.kwad out/pedler_oil.kwad
+	cp oil_fx.kwad out/oil_fx.kwad
 
 #
 # scripts
